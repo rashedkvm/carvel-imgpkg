@@ -95,8 +95,8 @@ func (c *CopyOptions) Run() error {
 	levelLogger := logger.NewLevelLogger(util.LogWarn, prefixedLogger)
 	imagesUploaderLogger := util.NewProgressBar(c.ui, "done uploading images", "Error uploading images")
 
-	imageSet := ctlimgset.NewImageSet(c.Concurrency, prefixedLogger)
-	tarImageSet := ctlimgset.NewTarImageSet(imageSet, c.Concurrency, prefixedLogger)
+	imageSet := ctlimgset.NewImageSet(c.Concurrency, c.ui)
+	tarImageSet := ctlimgset.NewTarImageSet(imageSet, c.Concurrency, c.ui)
 
 	var signatureRetriever SignatureRetriever
 	if c.SignatureFlags.CopyCosignSignatures {

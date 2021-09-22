@@ -39,12 +39,15 @@ func TestMain(m *testing.M) {
 	logger := util.NewLogger(stdOut)
 	prefixedLogger := logger.NewPrefixedWriter("test | ")
 	levelLogger := logger.NewLevelLogger(util.LogWarn, prefixedLogger)
-	imageSet := imageset.NewImageSet(1, prefixedLogger)
+	confUI := goui.NewConfUI(goui.NewNoopLogger())
+	defer confUI.Flush()
+
+	imageSet := imageset.NewImageSet(1, confUI)
 
 	subject = CopyRepoSrc{
 		logger:             levelLogger,
 		imageSet:           imageSet,
-		tarImageSet:        imageset.NewTarImageSet(imageSet, 1, prefixedLogger),
+		tarImageSet:        imageset.NewTarImageSet(imageSet, 1, confUI),
 		Concurrency:        1,
 		signatureRetriever: &fakeSignatureRetriever{},
 	}
