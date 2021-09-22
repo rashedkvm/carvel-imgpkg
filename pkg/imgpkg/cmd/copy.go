@@ -93,7 +93,7 @@ func (c *CopyOptions) Run() error {
 	logger := util.NewLogger(os.Stderr)
 	prefixedLogger := logger.NewPrefixedWriter("copy | ")
 	levelLogger := logger.NewLevelLogger(util.LogWarn, prefixedLogger)
-	imagesUploaderLogger := logger.NewProgressBar(c.ui, "done uploading images", "Error uploading images")
+	imagesUploaderLogger := util.NewProgressBar(c.ui, "done uploading images", "Error uploading images")
 
 	imageSet := ctlimgset.NewImageSet(c.Concurrency, prefixedLogger)
 	tarImageSet := ctlimgset.NewTarImageSet(imageSet, c.Concurrency, prefixedLogger)

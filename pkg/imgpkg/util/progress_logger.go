@@ -21,7 +21,7 @@ type ProgressLogger interface {
 
 // NewProgressBar constructor to build a ProgressLogger responsible for printing out a progress bar using updates when
 // writing to a registry via ggcr
-func (l ImgpkgLogger) NewProgressBar(ui goui.UI, finalMessage, errorMessagePrefix string) ProgressLogger {
+func NewProgressBar(ui goui.UI, finalMessage, errorMessagePrefix string) ProgressLogger {
 	ctx, cancel := context.WithCancel(context.Background())
 	if isatty.IsTerminal(os.Stdout.Fd()) {
 		return &ProgressBarLogger{ctx: ctx, cancelFunc: cancel, ui: ui, finalMessage: finalMessage, errorMessagePrefix: errorMessagePrefix}
