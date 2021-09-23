@@ -3,6 +3,8 @@
 
 package util
 
+import goui "github.com/cppforlife/go-cli-ui/ui"
+
 type LogLevel int
 
 type Logger interface {
@@ -18,11 +20,27 @@ type LoggerWithLevels interface {
 	Tracef(msg string, args ...interface{})
 }
 
+type UIWithLevels interface {
+	goui.UI
+
+	Errorf(msg string, args ...interface{})
+	Warnf(msg string, args ...interface{})
+	Debugf(msg string, args ...interface{})
+	Tracef(msg string, args ...interface{})
+}
+
 const (
 	LogTrace LogLevel = iota
 	LogDebug LogLevel = iota
 	LogWarn  LogLevel = iota
 )
+
+func NewUILevelLogger(level LogLevel, ui goui.UI) *UILevelWriter {
+	return &UILevelWriter{
+		UI:       ui,
+		LogLevel: level,
+	}
+}
 
 func (l ImgpkgLogger) NewLevelLogger(level LogLevel, logger Logger) *LoggerLevelWriter {
 	return &LoggerLevelWriter{
@@ -34,6 +52,11 @@ func (l ImgpkgLogger) NewLevelLogger(level LogLevel, logger Logger) *LoggerLevel
 type LoggerLevelWriter struct {
 	LogLevel LogLevel
 	logger   Logger
+}
+
+type UILevelWriter struct {
+	goui.UI
+	LogLevel LogLevel
 }
 
 func (l LoggerLevelWriter) Errorf(msg string, args ...interface{}) {
@@ -57,6 +80,32 @@ func (l LoggerLevelWriter) Debugf(msg string, args ...interface{}) {
 }
 
 func (l LoggerLevelWriter) Tracef(msg string, args ...interface{}) {
+	if l.LogLevel == LogTrace {
+		l.Logf(msg, args...)
+	}
+}
+
+func (l UILevelWriter) Errorf(msg string, args ...interface{}) {
+	l.Logf("Error: "+msg, args...)
+}
+
+func (l UILevelWriter) Warnf(msg string, args ...interface{}) {
+	if l.LogLevel <= LogWarn {
+		l.Logf("Warning: "+msg, args...)
+	}
+}
+
+func (l UILevelWriter) Logf(msg string, args ...interface{}) {
+	l.BeginLinef(msg, args...)
+}
+
+func (l UILevelWriter) Debugf(msg string, args ...interface{}) {
+	if l.LogLevel <= LogDebug {
+		l.Logf(msg, args...)
+	}
+}
+
+func (l UILevelWriter) Tracef(msg string, args ...interface{}) {
 	if l.LogLevel == LogTrace {
 		l.Logf(msg, args...)
 	}

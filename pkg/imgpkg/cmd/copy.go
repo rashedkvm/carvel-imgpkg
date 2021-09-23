@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/cppforlife/go-cli-ui/ui"
 	regv1 "github.com/google/go-containerregistry/pkg/v1"
@@ -90,9 +89,9 @@ func (c *CopyOptions) Run() error {
 		return err
 	}
 
-	logger := util.NewLogger(os.Stderr)
-	prefixedLogger := logger.NewPrefixedWriter("copy | ")
-	levelLogger := logger.NewLevelLogger(util.LogWarn, prefixedLogger)
+	//logger := util.NewLogger(os.Stderr)
+	//prefixedLogger := logger.NewPrefixedWriter("copy | ")
+	//levelLogger := logger.NewLevelLogger(util.LogWarn, prefixedLogger)
 	imagesUploaderLogger := util.NewProgressBar(c.ui, "done uploading images", "Error uploading images")
 
 	imageSet := ctlimgset.NewImageSet(c.Concurrency, c.ui)
@@ -105,6 +104,8 @@ func (c *CopyOptions) Run() error {
 		signatureRetriever = signature.NewNoop()
 	}
 
+	uiLogger := util.NewUILevelLogger(util.LogWarn, c.ui)
+
 	repoSrc := CopyRepoSrc{
 		ImageFlags:              c.ImageFlags,
 		BundleFlags:             c.BundleFlags,
@@ -113,7 +114,7 @@ func (c *CopyOptions) Run() error {
 		IncludeNonDistributable: c.IncludeNonDistributable,
 		Concurrency:             c.Concurrency,
 
-		logger:             levelLogger,
+		ui:                 uiLogger,
 		registry:           registry.NewRegistryWithProgress(reg, imagesUploaderLogger),
 		imageSet:           imageSet,
 		tarImageSet:        tarImageSet,
@@ -347,7 +348,7 @@ func everyMediaTypeForAnImage(image regv1.Image) []string {
 	return everyMediaType
 }
 
-func informUserToUseTheNonDistributableFlagWithDescriptors(logger util.LoggerWithLevels, includeNonDistributableFlag bool, everyMediaType []string) {
+func informUserToUseTheNonDistributableFlagWithDescriptors(ui util.UIWithLevels, includeNonDistributableFlag bool, everyMediaType []string) {
 	noNonDistributableLayers := true
 
 	for _, mediaType := range everyMediaType {
@@ -357,8 +358,8 @@ func informUserToUseTheNonDistributableFlagWithDescriptors(logger util.LoggerWit
 	}
 
 	if includeNonDistributableFlag && noNonDistributableLayers {
-		logger.Warnf("'--include-non-distributable-layers' flag provided, but no images contained a non-distributable layer.")
+		ui.Warnf("'--include-non-distributable-layers' flag provided, but no images contained a non-distributable layer.")
 	} else if !includeNonDistributableFlag && !noNonDistributableLayers {
-		logger.Warnf("Skipped layer due to it being non-distributable. If you would like to include non-distributable layers, use the --include-non-distributable-layers flag")
+		ui.Warnf("Skipped layer due to it being non-distributable. If you would like to include non-distributable layers, use the --include-non-distributable-layers flag")
 	}
 }
